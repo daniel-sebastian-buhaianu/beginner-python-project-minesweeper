@@ -1,7 +1,7 @@
 # implementation of a basic minesweeper game
 # which can be played in the terminal window 
 
-import random
+import random, re
 
 # lets create a board object to represent the minesweeper game
 # this is so that we can just say "create a new board object", or
@@ -104,7 +104,7 @@ class Board:
                     visible_board[row][col] = str(self.board[row][col])
                 else:
                     visible_board[row][col] = ' ' 
-                    
+
         # put this together in a string
         string_rep = ''
         # get max column widths for printing
@@ -148,10 +148,32 @@ def play(dim_size=10, num_bombs=10):
     board = Board(dim_size, num_bombs)
     
     # step 2: show the user the board and ask for where they want to dig
-
     # step 3a: if location is a bomb, show game over message
     # step 3b: if location is not a bomb, dig recursively until each square is at least next to a bomb
     # step 4: repeat steps 2 and 3a/b until there are no more places to dig -> victory!
-    pass
+    
+    safe = True
+    while len(board.dug) < board.dim_size ** 2 - num_bombs:
+        print(board)
+        user_input = re.split(",(\\s)*", input("Where would you like to dig? Input as row, col: "))
+        row, col = int(user_input[0]), int(user_input[-1])
+        if row < 0 or row >= board.dim_size or col < 0 or col >= board.dim_size:
+            print("Invalid location. Try again")
+            continue
 
- 
+        # if it's valid, then dig
+        safe = board.dig(row, col)
+        if not safe:
+            # dug a bomb 
+            break # game over
+
+    if safe:
+        print("Congratulations! You are victorious!")
+    else:
+        print("Sorry. Game over :(")
+        # let's reveal the board
+        board.dug = [(r, c) for r in range(board.dim_size) for c in range(board.dim_size)]
+        print(board)
+  
+if __name__ == "__main__":
+    play() 
